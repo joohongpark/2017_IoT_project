@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>전력관리 베타</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<link href="./images/favicon.ico" rel="icon">
+		<link href="./images/favicon.png" rel="shortcut icon">
+		<link href="./images/favicon.png" rel="apple-touch-icon">
+		<script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="./js/jqplot/jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.dateAxisRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.barRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.canvasTextRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.canvasAxisTickRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.highlighter.js"></script>
+		<script type="text/javascript" src="./js/jquery-ui.js"></script>
+		<script type="text/javascript" src="timer.js"></script>
+        <script type="text/javascript" src="./js/jquery.monthpicker-0.1.js"></script>
+        <link type="text/css" href="./css/jquery.monthpicker-0.1.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="./css/jquery-ui.css" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="./css/jquery.jqplot.min.css" />
+		<style type="text/css">
+			html, body{
+				background-color: #dddddd;
+			}
+			/* Slider Switches */
+			.switch {
+				position: relative;
+				display: inline-block;
+				width: 60px;
+				height: 34px;
+			}
+			/* Hide default HTML checkbox */
+				.switch input {display:none;}
+
+			/* The slider */
+			.slider {
+				position: absolute;
+				cursor: pointer;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background-color: #ccc;
+				-webkit-transition: .3s;
+				transition: .3s;
+			}
+
+			.slider:before {
+				position: absolute;
+				content: "";
+				height: 26px;
+				width: 26px;
+				left: 4px;
+				bottom: 4px;
+				background-color: white;
+				-webkit-transition: .3s;
+				transition: .3s;
+			}
+
+			input:checked + .slider {
+				background-color: #2196F3;
+			}
+
+			input:focus + .slider {
+				box-shadow: 0 0 1px #2196F3;
+			}
+
+			input:checked + .slider:before {
+				-webkit-transform: translateX(26px);
+				-ms-transform: translateX(26px);
+				transform: translateX(26px);
+			}
+
+			/* Rounded sliders */
+			.slider.round {
+				border-radius: 34px;
+			}
+
+			.slider.round:before {
+				border-radius: 50%;
+			}
+
+			/* Slider Switches end */
+
+			/* 그래프 탭 */
+			div.tab {
+				overflow: hidden;
+				border: 1px solid #ccc;
+				background-color: #f1f1f1;
+			}
+
+			/* Style the buttons inside the tab */
+			div.tab button {
+				background-color: inherit;
+				float: left;
+				border: none;
+				outline: none;
+				cursor: pointer;
+				padding: 14px 16px;
+				transition: 0.3s;
+				font-size: 17px;
+			}
+
+			/* Change background color of buttons on hover */
+			div.tab button:hover {
+				background-color: #ddd;
+			}
+
+			/* Create an active/current tablink class */
+			div.tab button.active {
+				background-color: #ccc;
+			}
+
+			/* Style the tab content */
+			.tabcontent {
+				display: none;
+				padding: 6px 12px;
+				-webkit-animation: fadeEffect 0.3s;
+				animation: fadeEffect 0.3s;
+			}
+
+			/* Fade in tabs */
+			@-webkit-keyframes fadeEffect {
+				from {opacity: 0;}
+				to {opacity: 1;}
+				}
+
+			@keyframes fadeEffect {
+				from {opacity: 0;}
+				to {opacity: 1;}
+			}
+
+			/*그래프 탭 끝 */
+
+			.toolbar {
+				position: fixed;
+				height: 44px;
+				top: 0;
+				right: 0;
+				left: 0;
+				z-index: 2;
+				font-size: 1.1rem;
+				text-align:center;
+				background-color: #9cdaf7;
+				font-family: '돋움',dotum,Helvetica,sans-serif;
+			}
+
+			#notice {
+				border: 1px solid #56b1fd;
+				position: fixed;
+				left: 80px;
+				height: 30px;
+				top: 6px;
+				text-align: center;
+				z-index: 3;
+				background-color: #7ec4ff;
+			}
+
+			.error {
+				background-color: red !important;
+			}
+
+			#whole_pow {
+				border: 1px solid #56b1fd;
+				position: fixed;
+				height: 30px;
+				right: 10px;
+				top: 6px;
+				z-index: 3;
+				text-align: center;
+				background-color: #7ec4ff;
+			}
+
+			.wrap {
+				/*position: fixed;*/
+				position: absolute;
+				padding: 20px;
+				top: 44px;
+				left: 0px;
+				right: 0px;
+				bottom: 0px;
+			}
+			/*
+			#textbox_area {
+				position: relative;
+				top: 20px;
+				left: 20px;
+				background-color: #eeeeee;
+				width: 300px;
+				height: 60px;
+				transform: rotate(-2deg);
+				box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.48);
+			}
+			*/
+			.innertext {
+				top: 5px;
+				left: 5px;
+				width: 200px;
+				height: 36px;
+				font-size: 30px;
+			}
+
+			.bold {
+				color: #454545;
+				text-align: center;
+				font-family: dotum, Tahoma, arial;
+				padding: 0px;
+				left: 15px;
+			}
+
+			.namesize {
+				position: absolute;
+				font-size: 30px;
+				top: 4px;
+			}
+
+			.wsize {
+				position: relative;
+				font-size: 24px;
+				top: 13px;
+			}
+
+			.lists {
+				position: relative;
+				box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.2)!important;
+/*				-webkit-border-radius: 5px;*/
+				border-radius: 3px;
+				border:1px solid #00457a;
+				margin-top: 10px;
+				height : 120px;
+				top: 0px;
+				left : 0px;
+				right : 0px;
+				background-color: #ffffff !important;
+			}
+
+			#area1 {
+				position: absolute;
+				padding: 0px;
+				top: 5px;
+				right: 5px;
+				left: 5px;
+				height: 60px;
+				border-bottom: solid 1px #a0a0a0;
+			}
+			#area2 {
+				padding: 0px;
+				top: 61px;
+				right: 5px;
+				left: 5px;
+				position: absolute;
+			}
+
+			.timer_area {
+				padding: 0px;
+				top: 120px;
+				right: 5px;
+				left: 5px;
+				position: absolute;
+			}
+
+			.graph_area {
+				padding: 0px;
+				top: 120px;
+				right: 5px;
+				left: 5px;
+				position: absolute;
+			}
+			#sw {
+				position: absolute;
+				right: 15px;
+				top: 10px;
+			}
+
+
+			/* timer측 style */
+			.canvas_timer{
+				background-image: url("ClockPuzzle3.png");
+				background-size: 100%;
+			}
+			.canvaswrap {
+				position: relative;
+				margin: 4px;
+				padding: 4px;
+				border:1px solid #beccce;
+				border-radius: 3px;
+				height: auto;
+			}
+			.wrap_small {
+				position: relative;
+				padding: 4px;
+				border:1px solid #a7b6b7;
+				border-radius: 3px;
+				height: 42px;
+			}
+
+			.inner_text {
+				display: inline-block;
+				width: auto;
+				font-size: 20px;
+				font-weight: 500;
+				text-decoration: none;
+				white-space: nowrap;
+			}
+
+			.list_button {
+				display: inline-block;
+				width: 120px;
+				height: 40px;
+				margin-right: 3px;
+				background-color: #9df9ac; 
+				border: solid 1px transparent;
+				padding: 0 10px;
+				outline: 0;
+				font-weight: 500;
+				font-size: 11px;
+				text-decoration: none;
+				white-space: nowrap;
+				word-wrap: normal;
+				line-height: normal;
+				vertical-align: middle;
+				cursor: pointer;
+				overflow: visible;
+				border-radius: 2px;
+				box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+			}
+			.del_button_space {
+				display: inline-block;
+				top: 0px;
+				right: 0px;
+				width: 20px;
+				height: 20px;
+				padding-right: 15px;
+			}
+			.del_button {
+				width: 20px;
+				height: 20px;
+				background-color: #f99d9d; 
+				border: solid 1px transparent;
+			}
+
+			.listswrap {
+				overflow-x:hidden;
+				position: absolute;
+				padding: 4px;
+				border-radius: 3px;
+				left: 418px;
+				top: 4px;
+				height: 400px;
+			}		
+
+			.showing {
+				height: 550px ;
+			}
+
+			@media only screen and (max-width:700px) {
+				.listswrap {
+					overflow: auto;
+					position: absolute;
+					padding: 4px;
+					border-radius: 3px;
+					left: 4px;
+					top: 418px;
+					height: 400px;
+				}		
+				.showing {
+					height: 1000px !important ;
+				}
+			}
+
+			/* 그래프측 */
+			div.graph {
+				height: 360px;
+				overflow: hidden;
+				border: 1px solid #ccc;
+				background-color: #f1f1f1;
+				border-radius: 3px;
+			}
+			.jqplot-target {
+				margin: 3px;
+				height: 317px;
+				width: 400px;
+				background-color: #e6f7ff;
+			}
+			.chart_header {
+				overflow: hidden;
+				border: 1px solid #ccc;
+				background-color: #f1f1f1;
+			}
+			.dateinput {
+				width: 200px;
+				height: 30px;
+				font-size: 14px;
+				box-sizing: border-box;
+			}
+			/* 대시보드 */
+			.dashboard {
+				position: fixed;
+				z-index: 3;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				background-color: rgba(0,0,0,0.6);
+			}
+			.panel {
+				border: 1px solid black;
+				border-radius: 6px;
+				z-index: 4;
+				background-color: white;
+				margin-top: 15px;
+				margin-bottom: 10px;
+				margin-right: 10px;
+				margin-left: 8px;
+				padding: 20px;
+			}
+			.is_Auto {
+				top: 10px;
+				position: relative;
+			}
+		</style>
+
+		<script type="text/javascript">
+		var device_available = new Array();
+		var device_available_prev = new Array();
+		var details_state = new Object();
+		var is_timer = new Object();
+		var plotobj = new Object();
+		var p_width = $(window).width() - 70;
+		if(p_width > 400)
+			p_width = 400;
+		var p_height = p_width;
+		var err_flag = false;
+		var graph_daily_setting = {
+			animate: true,
+			seriesColors: ["rgba(78, 135, 194, 0.7)", "rgb(211, 235, 59)"],
+			title: '일간 전력 소비량',
+			highlighter: {
+				show: true,
+				sizeAdjust: 1,
+				tooltipOffset: 9
+			},
+			grid: {
+				background: 'rgba(57,57,57,0.0)',
+				drawBorder: false,
+				shadow: false,
+				gridLineColor: '#80d4ff',
+				gridLineWidth: 2
+			},
+			legend: {
+				show: true,
+				location: 'nw'
+				//placement: 'outside'
+			},
+			series: [
+				{
+					pointLabels: {
+					show: true
+					},
+					renderer: $.jqplot.BarRenderer,
+					rendererOptions: {
+						smooth: true,
+						barWidth: 13,
+						barPadding: -13,
+						barMargin: 0,
+						highlightMouseOver: true
+					},
+					fill: false,
+					label: '시간당 사용량'
+				},
+				{
+					label: '누적 사용량',
+					showMarker: false
+				}
+			],
+			axes: {
+				xaxis: {
+					renderer: $.jqplot.DateAxisRenderer,
+					tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+					tickOptions: {
+						formatString: "%H시",
+						angle: -50,
+						textColor: '#0077b3'
+					},
+					min: "00:00",
+					max: "23:00",
+					tickInterval : '2 hour',
+					drawMajorGridlines: false
+				},
+				yaxis: {
+					//renderer: $.jqplot.LogAxisRenderer,
+					tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+					pad: 0,
+					rendererOptions: {
+						minorTicks: 1,
+						drawBaseline: false
+					},
+						tickOptions: {
+						formatString: "%'d Wh",
+						showMark: false,
+						textColor: '#0077b3'
+					}
+				}
+			}
+		};
+		var graph_month_setting = {
+			animate: true,
+			seriesColors: ["rgba(78, 135, 194, 0.7)", "rgb(211, 235, 59)"],
+			title: '월간 전력 소비량',
+			highlighter: {
+				show: true,
+				sizeAdjust: 1,
+				tooltipOffset: 9
+			},
+			grid: {
+				background: 'rgba(57,57,57,0.0)',
+				drawBorder: false,
+				shadow: false,
+				gridLineColor: '#80d4ff',
+				gridLineWidth: 2
+			},
+			legend: {
+				show: true,
+				location: 'nw'
+				//placement: 'outside'
+			},
+			series: [
+				{
+					pointLabels: {
+					show: true
+					},
+					renderer: $.jqplot.BarRenderer,
+					rendererOptions: {
+						smooth: true,
+						barWidth: 5,
+						barPadding: -13,
+						barMargin: 0,
+						highlightMouseOver: true
+					},
+					fill: false,
+					label: '일당 사용량'
+				},
+				{
+					label: '누적 사용량',
+					showMarker: false
+				}
+			],
+			axes: {
+				xaxis: {
+					renderer: $.jqplot.DateAxisRenderer,
+					tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+					tickOptions: {
+						formatString: "%m월 %#d일",
+						showMark: false,
+						//angle: -50,
+						textColor: '#0077b3'
+						},
+					tickInterval:'5 days'
+				},
+				yaxis: {
+					//renderer: $.jqplot.LogAxisRenderer,
+					tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+					pad: 0,
+					rendererOptions: {
+						minorTicks: 1,
+						drawBaseline: false
+					},
+						tickOptions: {
+						formatString: "%'d Wh",
+						showMark: false,
+						textColor: '#0077b3'
+					}
+				}
+			}
+		};
+		function createnode( id, name, has_timer) {
+			var element = document.getElementById("wrap");
+				var div_lists = document.createElement("div");
+					div_lists.setAttribute("class", "lists");
+					div_lists.setAttribute("id", "dev_" + id);
+					var div_area1 = document.createElement("div");
+						div_area1.setAttribute("id", "area1");
+
+						var span_name = document.createElement("span");
+							span_name.setAttribute("id", "name");
+							span_name.setAttribute("class", "bold namesize");
+							var span_innertext = document.createElement("span");
+								span_innertext.setAttribute("id", "name_" + id);
+								span_innertext.setAttribute("class", "bold spantext");
+								span_innertext.innerHTML = name;
+
+							span_name.appendChild(span_innertext);
+
+						div_area1.appendChild(span_name);
+
+						var span_sw = document.createElement("span");
+							span_sw.setAttribute("id", "sw");
+
+							var label_switch = document.createElement("label");
+								label_switch.setAttribute("class", "switch");
+
+								var input_sw = document.createElement("input");
+									input_sw.setAttribute("type", "checkbox");
+									input_sw.setAttribute("name", "key");
+									input_sw.setAttribute("id", "sw_" + id );
+									input_sw.setAttribute("value", id );
+									input_sw.setAttribute("onclick", "btnscript(this);");
+								label_switch.appendChild(input_sw);
+								var div_sw = document.createElement("div");
+									div_sw.setAttribute("class", "slider round");
+								label_switch.appendChild(div_sw);
+
+							span_sw.appendChild(label_switch);
+						div_area1.appendChild(span_sw);
+					div_lists.appendChild(div_area1);
+
+					var div_area2 = document.createElement("div");
+						div_area2.setAttribute("id", "area2");
+
+						var span_pow = document.createElement("span");
+							span_pow.setAttribute("class", "bold wsize");
+							span_pow.setAttribute("id", "pow_value_" + id);
+							//span_pow.innerHTML = "124W | 340Wh";
+
+						div_area2.appendChild(span_pow);
+
+						var span_etc = document.createElement("span");
+							span_etc.setAttribute("id", "sw");
+
+							var span_details = document.createElement("span");
+								span_details.setAttribute("id", "details");
+								span_details.setAttribute("class", "details");
+								span_details.setAttribute("onclick", "sw_details(" + id + ", 'graph', show_graph_div(" + id + "))");
+								span_details.innerHTML = '<img src = "c.png" width="38px">';
+
+							span_etc.appendChild(span_details);
+
+							var span_timer = document.createElement("span");
+								span_timer.setAttribute("id", "timer");
+								span_timer.setAttribute("class", "timer");
+								span_timer.setAttribute("onclick", "sw_details(" + id + ", 'timer', show_timer_div(" + id + "))");
+								if(has_timer) {
+									span_timer.innerHTML = '<img id="pic_' + id + '" src = "timer_exist.png" width="38px" id="has_timer" />';
+								} else {
+									span_timer.innerHTML = '<img id="pic_' + id + '" src = "timer_dontexist.png" width="38px" id="has_timer" />';
+								}
+
+							span_etc.appendChild(span_timer);
+
+						div_area2.appendChild(span_etc);
+					div_lists.appendChild(div_area2);
+				element.appendChild(div_lists);
+
+//			var inhtml = document.createTextNode("테스트~");
+//			div_lists.appendChild(inhtml);
+		}
+		function killnode(id) {
+			var child = document.getElementById(id);
+			console.log(id);
+			console.log(child);
+			var parent = child.parentNode;
+			parent.removeChild(child);
+		}
+
+		function init() {
+			$.ajax({
+				type:"GET",
+				url:"d.php",
+				success:function(args){
+					if(err_flag == true) {
+						document.getElementById("notice").setAttribute("class", null);
+						document.getElementById("notice").innerHTML = "전력관리 베타";
+					}
+					jsonobj = $.parseJSON(args);
+					for(i = 0; i < jsonobj.dev.length; i++) {
+						device_available_prev[jsonobj.dev[i].id] = true;
+						createnode(jsonobj.dev[i].id, decodeURI(jsonobj.dev_name[i].name),1 );
+					}
+				},
+				error:function(e){
+					err_flag = true;
+					document.getElementById("notice").setAttribute("class", "error");
+					document.getElementById("notice").innerHTML = "error #update_error";
+				}
+			});  
+		}
+
+		function update() {
+			$.ajax({
+				type:"GET",
+				url:"d.php",
+				success:function(args){
+					if(err_flag == true) {
+						document.getElementById("notice").setAttribute("class", null);
+						document.getElementById("notice").innerHTML = "전력관리 베타";
+					}
+					var temp_i = 0;
+					var temp_j = 0;
+					jsonobj = $.parseJSON(args);
+					//console.log(jsonobj);
+					for(i = 0; i < jsonobj.dev.length; i++) {
+						device_available[jsonobj.dev[i].id] = true;
+					}
+					for(i = 0; i < 32; i++) {
+						if (device_available_prev[i + 1] == true) {
+							if(device_available[i + 1] == true) {
+								for(j = 0; j < jsonobj.dev.length; j++) {
+									if(jsonobj.dev[j].id == (i + 1)) {
+										temp_j = j;
+									}
+								}
+								document.getElementById("pow_value_" + (i + 1)).innerHTML = pow_conv(jsonobj.dev[temp_j].energy, jsonobj.dev[temp_j].pow);
+								$("#sw_" + (i + 1)).prop('checked', eval(jsonobj.dev[temp_j].onoff));
+								if(eval(jsonobj.dev[temp_j].has_timer)) {
+									document.getElementById("pic_" + (i + 1)).src = "timer_exist.png";
+								} else {
+									document.getElementById("pic_" + (i + 1)).src = "timer_dontexist.png";
+								}
+								//console.log("동시에 존재 : " + (i + 1) );
+							} else {
+								//console.log("이전 DB에만 존재 : " + (i + 1) );
+								killnode("dev_" + (i + 1));
+							}
+						}
+					}
+					for(i = 0; i < 32; i++) {
+						if (device_available[i + 1] == true) {
+							if(device_available_prev[i + 1] !== true) {
+								for(j = 0; j < jsonobj.dev.length; j++) {
+									if(jsonobj.dev[j].id == (i + 1)) {
+										temp_i = j;
+									}
+								}
+								//console.log("현재 DB에만 존재 : " + (i + 1) );
+								createnode( (i + 1), decodeURI(jsonobj.dev_name[temp_i].name), eval(jsonobj.dev[temp_j].has_timer) );
+							}
+						}
+					}
+					device_available_prev = device_available;
+					device_available = new Array(); 
+				},
+				error:function(e){
+					err_flag = true;
+					document.getElementById("notice").setAttribute("class", "error");
+					document.getElementById("notice").innerHTML = "error #update_error";
+				}
+			});  
+		}
+
+		function changename( id ) {
+			var cname = document.getElementById("change_name_" + id).value;
+			if(cname) {
+				$.ajax({
+					type: "GET",
+					url: "change_name.php",
+					data: {id: id, data: encodeURI(cname)},
+					success:function(args){
+						document.getElementById("name_" + id).innerHTML = cname;
+						alert("적용되었습니다.");
+					}, 
+					error:function(args){
+						console.log("실패");
+					}
+				});
+			}
+		}
+		function get_timer_data_from_server(id) {
+			$.ajax({
+				type:"GET",
+				url:"timer_setting.php",
+				data: {id: id},
+				success:function(args){
+					var datas = $.parseJSON(args).times;
+					show_timer(("timer_area_" + id), id, datas);
+					//console.log(datas);
+				},
+				error:function(e){
+					return false;
+				}
+			});
+		}
+
+
+		function save_timer_data_to_server(id, data) {
+			$.ajax({
+				type:"GET",
+				url:"timer_setting.php",
+				data: {id: id, write: 1, data: JSON.stringify(data)},
+				success:function(args){
+					return true;
+				},
+				error:function(e){
+					return false;
+				}
+			});
+		}
+
+		function sw_details( id, what, callback ) {
+			if(!details_state[id]) {
+				details_state[id] = true;
+				if(what === 'timer') {
+					console.log("아무것도 없는 상태에서 타이머 누를때");
+					is_timer[id] = true;
+					$( "#dev_" + id ).animate( {height: 550 }, 250, callback );
+				} else if(what === 'graph') {
+					console.log("아무것도 없는 상태에서 그래프 누를때");
+					is_timer[id] = false;
+					$( "#dev_" + id ).animate( {height: 550 }, 250, callback );
+				} else {
+					return false;
+				}
+			} else {
+				if(what === 'timer') {
+					if(is_timer[id] == true) {
+						console.log("타이머를 보여주는 상태에서 타이머를 또 누를때");
+						is_timer[id] = false;
+						details_state[id] = false;						
+						$( "#dev_" + id ).animate( {height: 120 }, 250, callback );
+					} else {
+						is_timer[id] = true;
+						console.log("그래프를 보여주는 상태에서 타이머를 누를때");
+
+					}
+				} else if(what === 'graph') {
+					if(is_timer[id] == true) {
+						is_timer[id] = false;
+						console.log("타이머를 보여주는 상태에서 그래프를 누를때");
+
+					} else {
+						console.log("그래프를 보여주는 상태에서 그래프를 또 누를때");
+						is_timer[id] = false;
+						details_state[id] = false;						
+						$( "#dev_" + id ).animate( {height: 120 }, 250, callback );
+					}
+				} else {
+					return false;
+				}
+			}
+		}
+		function timer_ctrl(obj) {
+			console.log(obj.value, obj.checked);
+			$.ajax({
+				type: "GET",
+				url: "timer_ctrl.php",
+				data: {id: obj.value, data: obj.checked},
+				success:function(args){
+					console.log("성공");
+				}, 
+				error:function(args){
+					console.log("실패");
+				}
+			})
+		}
+		function show_graph_div( id ) {
+
+			var p = document.getElementById("dev_" + id)
+				p.setAttribute("class", "lists");
+			var add = document.createElement("div");
+				add.setAttribute("id", "graph_area_" + id);
+				add.setAttribute("class", "graph_area");
+				var tab = document.createElement("div");
+					tab.setAttribute("class", "tab");
+					var buttons_day = document.createElement("button");
+						buttons_day.setAttribute("class", "tablinks n" + id);
+						buttons_day.setAttribute("onclick", "tab_select(event, 'day', " + id + ")");
+						buttons_day.innerHTML = "일간";
+					tab.appendChild(buttons_day);
+					var buttons_month = document.createElement("button");
+						buttons_month.setAttribute("class", "tablinks n" + id);
+						buttons_month.setAttribute("onclick", "tab_select(event, 'month', " + id + ")");
+						buttons_month.innerHTML = "월간";
+					tab.appendChild(buttons_month);
+					var buttons_etc = document.createElement("button");
+						buttons_etc.setAttribute("class", "tablinks n" + id);
+						buttons_etc.setAttribute("onclick", "tab_select(event, 'etc', " + id + ")");
+						buttons_etc.innerHTML = "기타";
+					tab.appendChild(buttons_etc);
+				add.appendChild(tab);
+				var graph = document.createElement("div");
+					graph.setAttribute("class", "graph");
+					var div1 = document.createElement("div");
+						div1.setAttribute("id", "day_n" + id);
+						div1.setAttribute("class", "tabcontent n" + id);
+						var chart_header = document.createElement("div");
+							chart_header.setAttribute("class", "chart_header");
+							var input = document.createElement("input");
+								input.setAttribute("type", "text");
+								input.setAttribute("id", "date_" + id);
+								input.setAttribute("class", "dateinput");
+								input.setAttribute("value", "클릭해서 날짜를 입력하세요");
+							chart_header.appendChild(input);
+							var button = document.createElement("button");
+								button.setAttribute("onclick", "draw_graph(" + id + ")");
+								button.innerHTML = "Show";
+							chart_header.appendChild(button);
+						div1.appendChild(chart_header);
+						var chart = document.createElement("div");
+							chart.setAttribute("id", "chart_n" + id);
+							chart.setAttribute("class", "jqplot-target");
+						div1.appendChild(chart);
+					graph.appendChild(div1);
+					var div3 = document.createElement("div");
+						div3.setAttribute("id", "month_n" + id);
+						div3.setAttribute("class", "tabcontent n" + id);
+						var chart_header = document.createElement("div");
+							chart_header.setAttribute("class", "chart_header");
+							var input = document.createElement("input");
+								input.setAttribute("type", "text");
+								input.setAttribute("id", "date_month_" + id);
+								input.setAttribute("class", "dateinput");
+								input.setAttribute("value", "클릭해서 날짜를 입력하세요");
+							chart_header.appendChild(input);
+							var button = document.createElement("button");
+								button.setAttribute("onclick", "draw_month_graph(" + id + ")");
+								button.innerHTML = "Show";
+							chart_header.appendChild(button);
+						div3.appendChild(chart_header);
+						var chart = document.createElement("div");
+							chart.setAttribute("id", "chart_month_n" + id);
+							chart.setAttribute("class", "jqplot-target");
+						div3.appendChild(chart);
+					graph.appendChild(div3);
+					var div4 = document.createElement("div");
+						div4.setAttribute("id", "etc_n" + id);
+						div4.setAttribute("class", "tabcontent n" + id);
+						var cName = document.createElement("div");
+							var span_name = document.createElement("span");
+								span_name.innerHTML = "장치 이름 : ";
+							cName.appendChild(span_name);
+							var name = document.createElement("input");
+								name.setAttribute("type", "textbox");
+								name.setAttribute("id", "change_name_" + id);
+							cName.appendChild(name);
+							var button_name_change = document.createElement("button");
+								button_name_change.setAttribute("onclick", "changename(" + id + ")");
+								button_name_change.setAttribute("id", "change_name_" + id);
+								button_name_change.innerHTML = "적용";
+							cName.appendChild(button_name_change);
+						div4.appendChild(cName);
+						var is_Auto = document.createElement("div");
+							//is_Auto.setAttribute("class", "is_Auto");
+							var span_name = document.createElement("span");
+								span_name.innerHTML = "타이머 자동 제어 : ";
+							is_Auto.appendChild(span_name);
+							var span_sw = document.createElement("span");
+								span_sw.setAttribute("class", "is_Auto");
+								var label_switch = document.createElement("label");
+									label_switch.setAttribute("class", "switch");
+									var input_sw = document.createElement("input");
+										input_sw.setAttribute("type", "checkbox");
+										input_sw.setAttribute("name", "key");
+										input_sw.setAttribute("id", "sw_timer_" + id );
+										input_sw.setAttribute("value", id );
+										input_sw.setAttribute("onclick", "timer_ctrl(this);");
+									label_switch.appendChild(input_sw);
+									var div_sw = document.createElement("div");
+										div_sw.setAttribute("class", "slider round");
+									label_switch.appendChild(div_sw);
+								span_sw.appendChild(label_switch);
+							is_Auto.appendChild(span_sw);
+						div4.appendChild(is_Auto);
+					graph.appendChild(div4);
+				add.appendChild(graph);
+			if( (!details_state[id]) && (is_timer[id] == false) ) {
+				p.appendChild(add);
+			} else if( (details_state[id]) && (is_timer[id] == true) ) {
+				p.removeChild(p.lastChild);
+				p.setAttribute("class", "lists");
+				p.appendChild(add);
+			} else if( (details_state[id] == undefined) && (is_timer[id] == undefined) ) {
+				p.appendChild(add);
+			} else if( (details_state[id]) && (is_timer[id] == false) ) {
+				p.removeChild(p.lastChild);
+				p.setAttribute("class", "lists");
+			} else {
+				return false;
+			}
+			$.ajax({
+				type: "GET",
+				url: "timer_ctrl.php",
+				data: {id: id},
+				success:function(args){
+					var a = $.parseJSON(args)[0][id];
+					if(a) {
+						$("#sw_timer_" + id).prop('checked', true);
+					} else {
+						$("#sw_timer_" + id).prop('checked', false);
+					}
+				}, 
+				error:function(args){
+					console.log("실패");
+				}
+			});
+		}
+		function show_timer_div( id ) {
+			console.log("details_state[" + id + "] : " + details_state[id] + ", is_timer[" + id + "] : " + is_timer[id]);
+			var p = document.getElementById("dev_" + id);
+				p.setAttribute("class", "lists showing");
+			if( (!details_state[id]) && (!is_timer[id]) ) {
+				var add = document.createElement("div");
+					add.setAttribute("id", "timer_area_" + id);
+					add.setAttribute("class", "timer_area");
+				p.appendChild(add);
+				get_timer_data_from_server(id);
+			} else if( (details_state[id]) && (is_timer[id] == false) ) {
+				p.removeChild(p.lastChild);
+				p.setAttribute("class", "lists");
+				var add = document.createElement("div");
+					add.setAttribute("id", "timer_area_" + id);
+					add.setAttribute("class", "timer_area");
+				p.appendChild(add);
+				get_timer_data_from_server(id);
+			} else if( (details_state[id]) && (is_timer[id] == true) ) {
+				p.removeChild(p.lastChild);
+				p.setAttribute("class", "lists");
+			} else {
+				console.log("이외의 상황");
+				return false;
+			}
+		}
+		function pow_conv(pow, en) {
+			return (en > 1000) ? (en / 1000).toFixed(1) + "kWh" + " (" + pow.toFixed(1) + "W)" : en.toFixed(1) + "Wh" + " (" + pow.toFixed(1) + "W)";
+		}
+		function t1() {
+			$("body").bind('touchmove', function(e){e.preventDefault()});
+		}
+		function draw_graph(id, o) {
+			var date = "";
+			try {
+				date = document.getElementById("date_" + id).value.replace(/-/g, "").substr(2,6)
+			} catch (e) {
+					err_flag = true;
+					document.getElementById("notice").setAttribute("class", "error");
+					document.getElementById("notice").innerHTML = "error #date_parsing_error";
+			}
+			document.getElementById("chart_n" + id).innerHTML = "";
+			$.ajax({
+				type:"GET",
+				url:"graph_data.php",
+				data: {id: id, day: date},
+				success:function(args){
+					jsonobj = $.parseJSON(args);
+					$.jqplot._noToImageButton = true;
+					plotobj[id] = $.jqplot("chart_n" + id, [jsonobj.pow, jsonobj.sum], graph_daily_setting);
+				},
+				error:function(e){
+					return false;
+				}
+			});
+		}
+		function draw_month_graph(id, o) {
+			var date = "";
+			try {
+				date = document.getElementById("date_month_" + id).value.replace(/-/g, "").substr(2,4)
+			} catch (e) {
+					err_flag = true;
+					document.getElementById("notice").setAttribute("class", "error");
+					document.getElementById("notice").innerHTML = "error #date_month_parsing_error";
+			}
+			document.getElementById("chart_month_n" + id).innerHTML = "";
+			console.log(date);
+			$.ajax({
+				type:"GET",
+				url:"graph_month_data.php",
+				data: {id: id, month: date},
+				success:function(args){
+					jsonobj = $.parseJSON(args);
+					console.log(jsonobj);
+					$.jqplot._noToImageButton = true;
+					plotobj[id] = $.jqplot("chart_month_n" + id, [jsonobj.pow, jsonobj.sum], graph_month_setting);
+				},
+				error:function(e){
+					return false;
+				}
+			});
+		}
+		function calendar_even(id) {
+			$('#chart_n' + id).width($('#dev_' + id).width()*0.92);
+			$(function() {
+				$( "#date_" + id ).datepicker({
+					monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+					dayNamesMin: ['월', '화', '수', '목', '금', '토', '일'],
+					maxDate: "D",
+					dateFormat: "yy-mm-dd"
+				});
+			});
+		};
+		function calendar_month_even(id) {
+			$('#chart_month_n' + id).width($('#dev_' + id).width()*0.92);
+			$(function() {
+				$( "#date_month_" + id ).monthPicker();
+			});
+		};
+		function tab_select(evt, idname, no) {
+			var i, tabcontent, tablinks;
+			tabcontent = document.getElementsByClassName("tabcontent n" + no);
+			for (i = 0; i < tabcontent.length; i++) {
+				tabcontent[i].style.display = "none";
+			}
+			tablinks = document.getElementsByClassName("tablinks n" + no);
+			for (i = 0; i < tablinks.length; i++) {
+				tablinks[i].className = tablinks[i].className.replace(" active", "");
+			}
+			document.getElementById(idname + "_n" + no).style.display = "block";
+			evt.currentTarget.className += " active";
+			tab_exec(idname, no);
+		}
+		function tab_exec(name, no) {
+			if(name === 'day') {
+				calendar_even(no);
+				console.log("일간");
+			} else if(name === 'month') {
+				calendar_month_even(no);
+				console.log("월간");
+			} else if(name === 'etc') {
+				console.log("기타");
+			} else {
+				return false;
+			}
+		}
+		function dash() {
+			var val = document.getElementById("dashboard").style.display;
+			console.log(val);
+			if(val === "none") {
+				document.getElementById("dashboard").style.display = "block";
+			} else if(val === "block") {
+				document.getElementById("dashboard").style.display = "none";
+			} else {
+				return false;
+			}
+		}
+		function btnscript(obj) {
+			console.log(obj.value, obj.checked);
+			$.ajax({
+				type: "GET",
+				url: "sw.php",
+				data: {id: obj.value, data: obj.checked},
+				success:function(args){
+					console.log("성공");
+				}, 
+				error:function(args){
+					console.log("실패");
+				}
+			});
+		}
+		function reset() {
+			$.ajax({
+				type: "GET",
+				url: "reset.php",
+				data: {c: 'true'},
+				success:function(args){
+					console.log(args);
+					alert("모든 로그가 삭제되었습니다.");
+				}, 
+				error:function(args){
+					console.log("실패");
+				}
+			});
+		}
+		$(document).ready(function() {
+			init();
+			var id = setInterval(update, 2000);
+		});
+//$("#sw_15").prop('checked', eval('false'));
+		</script>
+	</head>
+	<body id="main">
+		<div class="toolbar">
+			<span id="notice" class="">전력관리 베타</span>
+			<div id="whole_pow" onclick="dash()">대시보드</div>
+		</div>
+		<div class="wrap" id="wrap">
+		</div>
+		<div id="dashboard" class="dashboard" style="display: none;">
+			<div id="panel" class="panel">
+			<button onclick="dash()" style="position: absolute; top: 30px; right: 30px; width: 100px; height: 40px;">닫기</button>
+			<button onclick="reset()" style="top: 30px; right: 30px; width: 100px; height: 40px;">모든 전력기록 초기화</button>
+			</div>
+		</div>
+	</body>
+</html>

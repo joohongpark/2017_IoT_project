@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>전력관리 베타</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<link href="./images/favicon.ico" rel="icon">
+		<link href="./images/favicon.png" rel="shortcut icon">
+		<link href="./images/favicon.png" rel="apple-touch-icon">
+		<script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="timer.js"></script>
+		<style type="text/css">
+
+		/* Style the tab */
+		div.tab {
+			overflow: hidden;
+			border: 1px solid #ccc;
+			background-color: #f1f1f1;
+		}
+
+		/* Style the buttons inside the tab */
+		div.tab button {
+			background-color: inherit;
+			float: left;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			padding: 14px 16px;
+			transition: 0.3s;
+			font-size: 17px;
+		}
+
+		/* Change background color of buttons on hover */
+		div.tab button:hover {
+			background-color: #ddd;
+		}
+
+		/* Create an active/current tablink class */
+		div.tab button.active {
+			background-color: #ccc;
+		}
+
+		/* Style the tab content */
+		.tabcontent {
+			display: none;
+			padding: 6px 12px;
+			-webkit-animation: fadeEffect 0.3s;
+			animation: fadeEffect 0.3s;
+		}
+
+		/* Fade in tabs */
+		@-webkit-keyframes fadeEffect {
+			from {opacity: 0;}
+			to {opacity: 1;}
+			}
+
+		@keyframes fadeEffect {
+			from {opacity: 0;}
+			to {opacity: 1;}
+		}
+
+		</style>
+
+		<script type="text/javascript">
+			function tab_select(evt, idname, no) {
+				var i, tabcontent, tablinks;
+				tabcontent = document.getElementsByClassName("tabcontent n" + no);
+				for (i = 0; i < tabcontent.length; i++) {
+					tabcontent[i].style.display = "none";
+				}
+				tablinks = document.getElementsByClassName("tablinks n" + no);
+				for (i = 0; i < tablinks.length; i++) {
+					tablinks[i].className = tablinks[i].className.replace(" active", "");
+				}
+				document.getElementById(idname + "_n" + no).style.display = "block";
+				evt.currentTarget.className += " active";
+			}
+		</script>
+
+	</head>
+	<body id="main">
+		<div class="tab">
+			<button class="tablinks n15" onclick="tab_select(event, 'day', 15)">일간 사용량</button>
+			<button class="tablinks n15" onclick="tab_select(event, 'week', 15)">주간 사용량</button>
+			<button class="tablinks n15" onclick="tab_select(event, 'month', 15)">월간 사용량</button>
+			<button class="tablinks n15" onclick="tab_select(event, 'etc', 15)">ETC</button>
+		</div>
+
+		<div id="day_n15" class="tabcontent n15">
+		<h3>일간 사용량</h3>
+		<p>어쩌고 저쩌고</p>
+		</div>
+
+		<div id="week_n15" class="tabcontent n15">
+		<h3>주간 사용량</h3>
+		<p>Paris is the capital of France.</p> 
+		</div>
+
+		<div id="month_n15" class="tabcontent n15">
+		<h3>Tokyo</h3>
+		<p>Tokyo is the capital of Japan.</p>
+		</div>
+
+		<div id="etc_n15" class="tabcontent n15">
+		<h3>Tokyo</h3>
+		<p>Tokyo is the capital of Japan.</p>
+		</div>
+	</body>
+</html>

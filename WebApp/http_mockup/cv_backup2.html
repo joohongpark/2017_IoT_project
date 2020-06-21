@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> 동그라미 그리기 </title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			canvas{
+				background-image: url("ClockPuzzle3.png");
+				background-size: 100%;
+			}
+		</style>
+	</head>
+<body>
+	<canvas id="cc" width="400" height="400"></canvas>
+	<span id="cc_v1"></span>
+	<button id="cd" onclick="a.addtime()">테스트</button>
+	<button id="cd" onclick="a.export()">테스트</button>
+	<canvas id="ee" width="800" height="800"></canvas>
+	<script>
+	function draw_timer(cfg) {
+		var canvas = document.getElementById(cfg.id);
+		var border = 5;
+		var rad = (canvas.width / 2) - border; //  반지름 (캔버스 크기에 의해 자동으로 정해짐)
+		var handler = this
+		var times_obj = cfg.times;
+		var times_n = cfg.times.length;
+		var start_times = new Array();
+		var stop_times = new Array();
+		var nowcontrol = 0;
+
+		var cursorAnimReady = true; // 원활한 프레임 구현
+		var scope = new Object; // 선택자 객체
+		var wheel = new Object; // 원 객체
+		var select_start = new Object; // 선택버튼 (시작) 객체
+		var select_stop = new Object; // 선택버튼 (시작) 객체
+
+		var events_arr = new Array(); // 이벤트 객체
+		var events_arr1 = new Array();
+
+		for(i = 0; i < times_n; i++) {
+			start_times[i] = times_obj[i].start_time;
+			stop_times[i] = times_obj[i].stop_time;
+		}
+
+		select_start.draw = function (c,n) {
+			var obj = c.getContext('2d');
+			var pos = timetopos(start_times[n]);
+			obj.beginPath();
+			obj.arc(pos.x, pos.y, pos.rad, 0, 2 * Math.PI, false);
+			// left top radius start end 시계방향
+			obj.fillStyle = "rgba(255,255,255,0)";
+			obj.fill();	
+			//obj.strokeStyle = "black";
+			obj.lineWidth = border;
+			//obj.stroke();
+			obj.closePath();
+		};
+
+		select_stop.draw = function (c,n) {
+			var obj = c.getContext('2d');
+			var pos = timetopos(stop_times[n]);
+			obj.beginPath();
+			obj.arc(pos.x, pos.y, pos.rad, 0, 2 * Math.PI, false);
+			// left top radius start end 시계방향
+			obj.fillStyle = "rgba(255,255,255,0)";
+			obj.fill();	
+			//obj.strokeStyle = "black";
+			obj.lineWidth = border;
+			//obj.stroke();
+			obj.closePath();
+		};
+
+		scope.draw = function (c,n) {
+			var obj = c.getContext('2d');
+			//wheel.draw(c); // 원 다시 그림
+			obj.beginPath();
+			obj.moveTo(c.width / 2, c.height / 2);
+			var start = (Math.PI/180) * -90 + (start_times[n] / 1440) * (2 * Math.PI);
+			var stop = (Math.PI/180) * -90 + (stop_times[n] / 1440) * (2 * Math.PI);
+			obj.arc(c.width / 2, c.height / 2, (c.width / 2) - border, start , stop, false);
+			// left top radius start end 시계방향
+			obj.fillStyle = "rgba(153,228,255,0.3)";
+			obj.fill();		
+			obj.strokeStyle = "#61d6ff";	
+			obj.lineWidth = 1;
+			obj.closePath();
+			obj.stroke();		
+		}
+
+		wheel.draw = function (c) {
+			var obj = c.getContext('2d');
+			obj.beginPath();
+			obj.arc(canvas.width / 2, canvas.height / 2, rad, 0, 2 * Math.PI, false);
+			// left top radius start end 시계방향
+			obj.strokeStyle = "black";
+			obj.lineWidth = border;
+			obj.stroke();
+			obj.closePath();
+		};
+		function getAngle(newDot) { // 마우스 포인터가 가리키는 각을 구해줌 (입력변수 : 좌표)
+			var angle;
+			var atan = Math.atan2(newDot.x, newDot.y);
+			if(atan < 0) {
+				atan += 2 * Math.PI;
+			}
+			return atan;
+		}
+
+		function timetopos(time) { // 각도 (시간값)를 position 값으로 변환
+			var theta = (time / 1440) * 2 * Math.PI;
+			var canvas_posx = (canvas.width - border) / 2; // center
+			var canvas_posy = (canvas.height - border) / 2; // center
+			var posx = ( Math.sin(theta) + 1) * canvas_posx;
+			var posy = (-Math.cos(theta) + 1) * canvas_posy;
+			var rads = (rad / 10);
+			return {x: posx, y: posy, rad: rads};
+		}
+
+		function timetopos_abs(time) { // 각도 (시간값)를 position 값으로 변환
+			var theta = (time / 1440) * 2 * Math.PI;
+			var canvas_posx = (canvas.width - border) / 2; // center
+			var canvas_posy = (canvas.height - border) / 2; // center
+			var posx = Math.sin(theta) * canvas_posx;
+			var posy = Math.cos(theta) * canvas_posy;
+			var rads = (rad / 10);
+			return {x: posx, y: posy, rad: rads};
+		}
+
+		function getMousePosition(e) {
+			e = e || window.event;
+			var x, y;
+			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+			var posx = canvas.width / 2; // center
+			var posy = canvas.height / 2; // center
+
+			if (e.touches) {
+				x = e.touches[0].clientX + scrollX;
+				y = e.touches[0].clientY + scrollY;
+			} else {
+				// e.pageX e.pageY e.x e.y bad for cross-browser
+				x = e.clientX + scrollX;
+				y = e.clientY + scrollY;
+			}
+
+			var rect = canvas.getBoundingClientRect();
+			x -= rect.left + scrollX;
+			y -= rect.top + scrollY;
+
+			// 2차원 좌표계로 변환
+			x = x - posx;
+			y = posy - y;
+
+			return {x: x, y: y};
+		}
+
+		wheel.isDotIn = function (nowDot, point) {
+			// is dot in circle
+			if (Math.pow(nowDot.x - point.x, 2) + Math.pow(nowDot.y - point.y, 2) < Math.pow(point.rad, 2)) {
+				return true;
+			}
+			return false;
+		};
+
+		function enableEvents() {
+
+			// 1. 처음 누를 때
+			addEventListner(canvas, "mousedown", function (e) { // 마우스 누를때
+				handler.mouseDown(e);
+			}, 'wait_action_');
+			addEventListner(canvas, "touchstart", function (e) { // 모바일용 (터치 발생시)
+				handler.mouseDown(e);
+			}, 'wait_action_');
+
+			// 2. 터치하고 움직일때
+			addEventListner(window, "touchmove", function (e) { // 모바일용 (터치하고 움직일때)
+				handler.mouseMove(e);
+			}, 'wait_action_');
+			addEventListner(canvas, "mousemove", function (e) { // 마우스 움직일때
+				handler.mouseMove(e);
+			}, 'wait_action_');
+
+			// 3. 마우스 뗄때
+			addEventListner(document, "mouseup", function (e) { // 마우스 뗄때
+				handler.mouseUp(e);
+			}, 'action_process_');
+			addEventListner(document, "touchend", function (e) { // 터치 손가락 뗄 때
+				handler.mouseUp(e);
+			}, 'action_process_');
+
+			// 4. 마우스 벗어날때
+			addEventListner(canvas, "mouseout", function (e) { // 객체에서 마우스 벗어날때
+				handler.mouseOver(e);
+			}, 'wait_action_');
+	    }
+		function disableEvents() {
+			removeEventListener(canvas, "mousedown", 'wait_action_');
+			removeEventListener(canvas, "touchstart", 'wait_action_');
+			removeEventListener(canvas, "mouseout", 'wait_action_');
+			removeEventListener(window, "touchmove", 'wait_action_');
+			removeEventListener(canvas, "mousemove", 'wait_action_');
+			removeEventListener(window, "mouseup", 'wait_action_');
+			removeEventListener(window, "touchend", 'wait_action_');
+
+		}
+		function addEventListner(object, event, callback, prefix) {
+			if (!object)
+				return false;
+			if (!prefix)
+				prefix = '';
+
+			events_arr[prefix + event] = callback;
+
+			if (!object.addEventListener) {
+				object.attachEvent('on' + event, events_arr[prefix + event]);
+			} else {
+				object.addEventListener(event, events_arr[prefix + event]);
+			}
+
+			return true;
+		}
+		function removeEventListener(object, event, prefix) {
+			if (!object)
+				return false;
+			if (!prefix)
+				prefix = '';
+
+			if (!events_arr[prefix + event])
+				return false;
+
+			if (!object.removeEventListener) {
+				object.detachEvent('on' + event, events_arr[prefix + event]);
+			} else {
+				object.removeEventListener(event, events_arr[prefix + event]);
+			}
+
+			events_arr[prefix + event] = null;
+			return true;
+		}
+
+		this.mouseDown = function (e) {
+			var is_range = false;
+			var is_start = false;
+			var p = 0;
+			for(i = 0; i < times_n; i++) {
+				var s1 = wheel.isDotIn(getMousePosition(e),timetopos_abs(start_times[i]));
+				var s2 = wheel.isDotIn(getMousePosition(e),timetopos_abs(stop_times[i]));
+				if(s1 == true || s2 == true) {
+					is_range = true;
+					p = i;
+					if(s1 == true)
+						is_start = true;
+				}
+			}
+			if( events_arr1["mouseUp"] == true ) {
+				events_arr1["mouseUp"] = false;
+			}
+			if( events_arr1["mouseDown"] == true ) {
+				removeEventListener(canvas, "mousedown", 'wait_action_');
+				removeEventListener(canvas, "touchstart", 'wait_action_');
+			}
+			if(is_range == false) {
+				return false;
+			}
+			if( is_start == true ) {
+				events_arr1["mouseDown"] = true;
+				events_arr1["mouseDown_Start"] = true;	
+				events_arr1[p] = true;
+				enableEvents();
+			} else {
+				events_arr1["mouseDown"] = true;
+				events_arr1["mouseDown_Stop"] = true;
+				events_arr1[p] = true;		
+				enableEvents();
+			}
+
+		}
+
+		this.mouseMove = function (e) {
+			events_arr1["mouseMove"] = true;
+			var n = 0;
+			for(i = 0; i < times_n; i++) {
+				if(events_arr1[i] == true) {
+					n = i;
+				}
+			}
+			if (!cursorAnimReady) {
+				return;
+			}
+			cursorAnimReady = false;
+
+			if (events_arr1["mouseUp"] == true) {
+				return;
+			}
+			if(events_arr1["mouseDown_Start"] == true) {
+				start_times[n] = getAngle(getMousePosition(e)) / (2 * Math.PI);
+				start_times[n] = start_times[n] * 1440;
+				change_inhtml("cc_v1",start_times[n]);
+				draw_All();
+			} else if(events_arr1["mouseDown_Stop"] == true) {
+				stop_times[n] = getAngle(getMousePosition(e)) / (2 * Math.PI);
+				stop_times[n] = stop_times[n] * 1440;
+				change_inhtml("cc_v1",stop_times[n]);
+				draw_All();
+			}
+			requestAnimationFrame(function () {
+				cursorAnimReady = true;
+			});
+			
+		}
+
+		this.mouseUp = function (e) {
+			for(i = 0; i < times_n; i++) {
+				events_arr1[i] = false;
+			}
+			events_arr1["mouseUp"] = true;
+			events_arr1["mouseDown_Start"] = false;
+			events_arr1["mouseDown_Stop"] = false;
+			events_arr1["mouseMove"] = false;
+			removeEventListener(window, "touchmove", 'wait_action_');
+			removeEventListener(canvas, "mousemove", 'wait_action_');
+			removeEventListener(window, "mouseup", 'wait_action_');
+			removeEventListener(window, "touchend", 'wait_action_');
+			
+		}
+
+		this.mouseOver = function (e) {
+			for(i = 0; i < times_n; i++) {
+				events_arr1[i] = false;
+			}
+			events_arr1["mouseUp"] = false;
+			events_arr1["mouseDown_Start"] = false;
+			events_arr1["mouseDown_Stop"] = false;
+			events_arr1["mouseMove"] = false;
+			removeEventListener(window, "touchmove", 'wait_action_');
+			removeEventListener(canvas, "mousemove", 'wait_action_');
+			removeEventListener(window, "mouseup", 'wait_action_');
+			removeEventListener(window, "touchend", 'wait_action_');
+			
+		}
+		function change_inhtml(id,value) {
+			var h = Math.floor( Math.ceil(value) / 60 );
+			var m = Math.ceil(value) % 60;
+			document.getElementById(id).innerHTML = h + "시 " + m + "분";
+		}
+		function draw_All () {
+			canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height); // 화면 비우기	
+			wheel.draw(canvas);	
+			for(i = 0; i < times_n; i++) {
+				scope.draw(canvas, i);
+				select_start.draw(canvas, i);
+				select_stop.draw(canvas, i);
+			}	
+		}
+		this.addtime = function () {
+			start_times.push(180);
+			stop_times.push(300);
+			times_n++;
+			draw_All();
+
+		};
+		this.export = function () {
+			var obj = new Array();
+			for(i = 0; i < times_n; i++) {
+				var tobj = new Object();
+				tobj.start_time = Math.floor(start_times[i]);
+				tobj.stop_time = Math.floor(stop_times[i]);
+				obj.push(tobj);
+				//obj[i]["stop_times"] = stop_times[i];
+			}
+			console.log(obj);
+			return obj;
+
+		};
+		draw_All();
+		addEventListner(canvas, "mousedown", function (e) { // 마우스 누를때
+			handler.mouseDown(e);
+		}, 'wait_action_');
+		addEventListner(canvas, "touchstart", function (e) { // 모바일용 (터치 발생시)
+			handler.mouseDown(e);
+		}, 'wait_action_');
+		//enableEvents();
+	}
+
+	var a = new draw_timer({id : 'cc', times : [{start_time : 60, stop_time : 120},{start_time : 360, stop_time : 1000}] });
+	new draw_timer({id : 'ee', times : [{start_time: 1183, stop_time: 1229}, {start_time: 878, stop_time: 1000}, {start_time: 1304, stop_time: 1378}, {start_time: 662, stop_time: 736}, {start_time: 493, stop_time: 574}, {start_time: 180, stop_time: 300}]});
+	</script>
+</body>
+</html>

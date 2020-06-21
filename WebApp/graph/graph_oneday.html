@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>전력관리 베타</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="./js/jqplot/jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.dateAxisRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.barRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.canvasTextRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.canvasAxisTickRenderer.js"></script>
+		<script type="text/javascript" src="./js/jqplot/plugins/jqplot.highlighter.js"></script>
+		<link rel="stylesheet" type="text/css" href="./css/jquery.jqplot.min.css" />
+		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/themes/smoothness/jquery-ui.css" />
+		<style type="text/css">
+			.jqplot-target {
+				margin: 20px;
+				height: 340px;
+				width: 600px;
+				background-color: #222222;
+
+			}
+		</style>
+
+		<script type="text/javascript">
+$(document).ready(function () {
+    $.jqplot._noToImageButton = true;
+    var prevYear = [["00:00",200], ["01:00",572], ["02:00",876], ["03:00",346],
+    				["04:00",306], ["05:00",502], ["06:00",705], ["07:00",96],
+    				["08:00",830], ["09:00",892], ["10:00",464], ["11:00",411],
+    				["12:00",3], ["13:00",251], ["14:00",179], ["15:00",527],
+    				["16:00",739], ["17:00",43], ["18:00",53], ["19:00",341],
+    				["20:00",326], ["21:00",250], ["22:00",825], ["23:00",364]];
+ 
+    var currYear = [["00:00",200], ["01:00",772], ["02:00",1648], ["03:00",1994],
+    				["04:00",2300], ["05:00",2802], ["06:00",3507], ["07:00",3603],
+    				["08:00",4433], ["09:00",5325], ["10:00",5789], ["11:00",6200],
+    				["12:00",6203], ["13:00",6454], ["14:00",6633], ["15:00",7160],
+    				["16:00",7899], ["17:00",7942], ["18:00",7995], ["19:00",8336],
+    				["20:00",8662], ["21:00",8912], ["22:00",9737], ["23:00",10101]];
+ 
+    var plot1 = $.jqplot("chart1", [prevYear, currYear], {
+        seriesColors: ["rgba(78, 135, 194, 0.7)", "rgb(211, 235, 59)"],
+        title: '일간 전력 소비량',
+        highlighter: {
+            show: true,
+            sizeAdjust: 1,
+            tooltipOffset: 9
+        },
+        grid: {
+            background: 'rgba(57,57,57,0.0)',
+            drawBorder: false,
+            shadow: false,
+            gridLineColor: '#666666',
+            gridLineWidth: 2
+        },
+        legend: {
+            show: true,
+            placement: 'outside'
+        },
+        seriesDefaults: {
+            rendererOptions: {
+                smooth: true,
+                animation: {
+                    show: true
+                }
+            },
+            showMarker: false
+        },
+        series: [
+            {
+            	pointLabels: {
+                    show: true
+                },
+                renderer: $.jqplot.BarRenderer,
+                fill: false,
+                label: '누적'
+            },
+            {
+                label: '시간당'
+            }
+        ],
+        axesDefaults: {
+            rendererOptions: {
+                baselineWidth: 1.5,
+                baselineColor: '#444444',
+                drawBaseline: false
+            }
+        },
+        axes: {
+            xaxis: {
+                renderer: $.jqplot.DateAxisRenderer,
+                tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                tickOptions: {
+                    formatString: "%H:00",
+                    angle: -50,
+                    textColor: '#eeeeee'
+                },
+                min: "00:00",
+                max: "24:00",
+                tickInterval : '1 hour',
+                drawMajorGridlines: false
+            },
+            yaxis: {
+                //renderer: $.jqplot.LogAxisRenderer,
+                pad: 0,
+                rendererOptions: {
+                    minorTicks: 1
+                },
+                tickOptions: {
+                    formatString: "%'d Wh",
+                    showMark: false,
+                    textColor: '#eeeeee'
+                }
+            }
+        }
+    });
+ 
+      $('.jqplot-highlighter-tooltip').addClass('ui-corner-all')
+});
+		</script>
+
+	</head>
+	<body id="main">
+		<div class="ui-widget-content ui-corner-bottom">
+            <div id="chart1" class="jqplot-target"></div>
+        </div>
+	</body>
+</html>

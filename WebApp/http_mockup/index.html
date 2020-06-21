@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>전력관리 베타</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link href="./images/favicon.ico" rel="icon">
+		<link href="./images/favicon.png" rel="shortcut icon">
+		<link href="./images/favicon.png" rel="apple-touch-icon">
+		<script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="./js/js.js"></script>
+		<script type="text/javascript" src="./js/jquery.canvasjs.min.js"></script>
+		<link href="./css/css.css" type="text/css" rel="stylesheet">
+		<!--
+		<script type="text/javascript">
+			$(function () {
+				//Better to construct options first and then pass it as a parameter
+				var options = {
+					title: {
+						text: "24시간 동안의 전력 사용량"
+					},
+			                animationEnabled: true,
+					data: [
+					{
+						type: "line", //change it to line, area, column, pie, etc
+						dataPoints: [
+							{ x: 0 , y: 5},
+							{ x: 10, y: 10 },
+							{ x: 20, y: 12 },
+							{ x: 30, y: 8 },
+							{ x: 40, y: 14 },
+							{ x: 50, y: 6 },
+							{ x: 60, y: 24 },
+							{ x: 70, y: -4 },
+							{ x: 80, y: 10 }
+						]
+					}
+					]
+				};
+
+				$("#chartContainer").CanvasJSChart(options);
+
+			});
+		</script>
+		-->
+	</head>
+	<body id="main">
+		<div id="toolbar" class="toolbar bg-red f-white">
+		<span style="">전력관리 베타</span>
+		<!-- 
+			<img src="./images/menu.png" id="background-image" style="height: 30px; opacity: 1; display: block;">
+			-->
+		</div>
+		<div id="contents">
+			<div id="1" class="lists bg-white">
+				<span id="name" class="name">전등</span>
+				<span id="pow" class="pow"></dspan>
+			</div>
+			<div id="2" class="lists bg-white">
+				<span id="name" class="name">냉장고</span>
+				<span id="pow" class="pow"></span>
+			</div>
+			<!-- <div id="chartContainer" style="height: 100%; width: 100%;"></div> -->
+		</div>
+	</body>
+</html>
